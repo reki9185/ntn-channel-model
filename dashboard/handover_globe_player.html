@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NTN Handover Globe Player</title>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.131/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.131/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #edf6ef;
+      --panel: rgba(247, 252, 248, 0.95);
+      --panel-strong: rgba(240, 249, 242, 0.98);
+      --ink: #1d2a33;
+      --muted: #596773;
+      --accent: #5f9f7a;
+      --serving: #c44e52;
+      --target: #4c72b0;
+      --focus: #5b8c5a;
+      --border: rgba(49, 57, 68, 0.16);
+      --shadow: 0 18px 42px rgba(44, 44, 35, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      background:
+        radial-gradient(circle at top left, rgba(183, 219, 196, 0.52), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(21, 122, 110, 0.16), transparent 26%),
+        linear-gradient(180deg, #f5fbf5 0%, #e8f2e9 100%);
+      color: var(--ink);
+      font-family: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding: 18px;
+    }
+
+    .half {
+      display: grid;
+      grid-template-columns: minmax(320px, 390px) 1fr;
+      gap: 18px;
+      align-items: stretch;
+      min-height: 0;
+    }
+
+    .top-half {
+      min-height: 780px;
+    }
+
+    .bottom-half {
+      min-height: 0;
+    }
+
+    .column-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 0;
+      align-self: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      padding: 16px 18px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(95, 159, 122, 0.95), rgba(151, 203, 171, 0.92));
+      color: #fff9f2;
+    }
+
+    .eyebrow,
+    .section-title,
+    label {
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .eyebrow {
+      font-size: 0.72rem;
+      margin-bottom: 8px;
+      opacity: 0.85;
+    }
+
+    h1, p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 1.65rem;
+      line-height: 1.08;
+    }
+
+    .hero p {
+      margin-top: 10px;
+      color: rgba(255, 249, 242, 0.88);
+    }
+
+    .section-title,
+    label {
+      color: var(--muted);
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .stat {
+      background: rgba(255, 252, 247, 0.88);
+      border: 1px solid rgba(56, 64, 74, 0.08);
+      border-radius: 16px;
+      padding: 11px 12px;
+      min-height: 72px;
+    }
+
+    .stat-value {
+      margin-top: 6px;
+      font-size: 1rem;
+      font-weight: 800;
+      line-height: 1.2;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-value.small {
+      font-size: 0.88rem;
+    }
+
+    input[type="text"],
+    select,
+    button,
+    input[type="file"] {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid rgba(63, 72, 82, 0.18);
+      background: rgba(255, 252, 246, 0.96);
+      color: var(--ink);
+      padding: 11px 12px;
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, #5f9f7a, #78b68f);
+      color: white;
+    }
+
+    .secondary {
+      background: linear-gradient(135deg, #fff7eb, #f7e2c9);
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .row > * {
+      flex: 1 1 auto;
+    }
+
+    .inline-check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .inline-check input {
+      width: auto;
+      accent-color: var(--accent);
+    }
+
+    .timeline-wrap {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .timeline-labels {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    .event-list {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 180px;
+      overflow: auto;
+    }
+
+    .event-item {
+      border-radius: 14px;
+      border: 1px solid rgba(72, 80, 92, 0.1);
+      background: rgba(255, 252, 247, 0.88);
+      padding: 10px 12px;
+      font-size: 0.9rem;
+    }
+
+    .event-item.active {
+      border-color: rgba(95, 159, 122, 0.36);
+      box-shadow: inset 0 0 0 1px rgba(95, 159, 122, 0.16);
+      background: rgba(235, 247, 238, 0.95);
+    }
+
+    .main-pane {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    #cesiumContainer {
+      width: 100%;
+      height: 80%;
+      min-height: 720px;
+      border-radius: 28px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      background: #dbe5ec;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-top: 10px;
+    }
+
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(0, 0, 0, 0.18);
+      flex: 0 0 auto;
+    }
+
+    @media (max-width: 1080px) {
+      .half {
+        grid-template-columns: 1fr;
+      }
+
+      .top-half {
+        min-height: 0;
+      }
+
+      #cesiumContainer {
+        height: 68vh;
+        min-height: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="half top-half">
+    <aside class="column-stack">
+      <section class="panel hero">
+        <div class="eyebrow">NTN 3D Viewer</div>
+        <h1>NTN Handover Dashboard</h1>
+      </section>
+
+      <section class="panel">
+        <div class="field" style="margin-top: 12px;">
+          <label for="ueSelect">Focused UE</label>
+          <select id="ueSelect"></select>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">Current Frame</div>
+        <div class="stats-grid">
+          <div class="stat">
+            <div class="section-title">Current Sat</div>
+            <div id="servingSatValue" class="stat-value small">-</div>
+          </div>
+          <div class="stat">
+            <div class="section-title">Target Sat</div>
+            <div id="neighborSatValue" class="stat-value small">-</div>
+          </div>
+        <div class="stat">
+          <div class="section-title">Current SNR</div>
+          <div id="servingSnrValue" class="stat-value">-</div>
+        </div>
+        <div class="stat">
+          <div class="section-title">Target SNR</div>
+          <div id="neighborSnrValue" class="stat-value">-</div>
+        </div>
+        <div class="stat">
+          <div class="section-title">Current Dist</div>
+          <div id="servingDistanceValue" class="stat-value">-</div>
+        </div>
+        <div class="stat">
+          <div class="section-title">Target Dist</div>
+          <div id="neighborDistanceValue" class="stat-value">-</div>
+        </div>
+        <div class="stat">
+          <div class="section-title">Current Elev</div>
+          <div id="servingElevationValue" class="stat-value">-</div>
+        </div>
+        <div class="stat">
+          <div class="section-title">Target Elev</div>
+          <div id="neighborElevationValue" class="stat-value">-</div>
+        </div>
+      </div>
+    </section>
+
+      <section class="panel">
+        <div class="section-title">Handover Timeline</div>
+        <div id="eventList" class="event-list"></div>
+      </section>
+    </aside>
+
+    <main class="main-pane">
+      <div id="cesiumContainer"></div>
+    </main>
+  </div>
+
+  <div class="half bottom-half">
+    <aside class="column-stack">
+      <section class="panel">
+        <div class="section-title">Legend</div>
+        <div class="legend-item"><span class="swatch" style="background:#d1d5db;"></span> Unfocused UE on ground</div>
+        <div class="legend-item"><span class="swatch" style="background:#5b8c5a;"></span> Focused UE on ground</div>
+        <div class="legend-item"><span class="swatch" style="background:#c44e52;"></span> Current satellite in orbit</div>
+        <div class="legend-item"><span class="swatch" style="background:#4c72b0;"></span> Target satellite in orbit</div>
+      </section>
+    </aside>
+
+    <main class="main-pane">
+      <section class="panel">
+        <div class="section-title">Data Sources</div>
+        <div class="row" style="margin-top: 12px;">
+          <button id="loadDefault" class="primary">Load Default Files</button>
+          <button id="liveToggle" class="secondary">Start Live</button>
+          <button id="fitView" class="secondary">Reset View</button>
+        </div>
+        <div class="grid2" style="margin-top: 12px;">
+          <div class="field">
+            <label for="ueFile">Upload UE CSV</label>
+            <input id="ueFile" type="file" accept=".csv,text/csv">
+          </div>
+          <div class="field">
+            <label for="snapshotFile">Upload Snapshot CSV</label>
+            <input id="snapshotFile" type="file" accept=".csv,text/csv">
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">Playback</div>
+        <div class="grid2" style="margin-top: 12px;">
+          <div class="field">
+            <label>Focused UE</label>
+            <div id="playbackFocusedUeValue" class="stat-value small">-</div>
+          </div>
+          <div class="field">
+            <label for="speedSelect">Speed</label>
+            <select id="speedSelect">
+              <option value="0.5">0.5x</option>
+              <option value="1" selected>1x</option>
+              <option value="2">2x</option>
+              <option value="4">4x</option>
+            </select>
+          </div>
+        </div>
+        <div class="row" style="margin-top: 12px;">
+          <button id="playToggle" class="primary">Play</button>
+          <button id="stepBack" class="secondary">Prev</button>
+          <button id="stepForward" class="secondary">Next</button>
+        </div>
+        <div class="timeline-wrap">
+          <div class="timeline-labels">
+            <span id="timeLabel">t = 0.0 s</span>
+            <span id="frameLabel">Frame 0 / 0</span>
+          </div>
+          <input id="timeline" type="range" min="0" max="0" value="0" step="1">
+        </div>
+        <label class="inline-check">
+          <input id="autoFollow" type="checkbox">
+          Camera follows focused UE
+        </label>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const DEFAULT_UE_CSV_PATH = "../result/tdcho/visualization_ue_positions.csv";
+    const DEFAULT_SNAPSHOT_CSV_PATH = "../result/tdcho/visualization_snapshot.csv";
+    const LIVE_REFRESH_MS = 1000;
+
+    const palette = {
+      muted: Cesium.Color.fromCssColorString("#d1d5db"),
+      focused: Cesium.Color.fromCssColorString("#5b8c5a"),
+      serving: Cesium.Color.fromCssColorString("#c44e52"),
+      target: Cesium.Color.fromCssColorString("#4c72b0")
+    };
+
+    const dom = {
+      loadDefault: document.getElementById("loadDefault"),
+      fitView: document.getElementById("fitView"),
+      liveToggle: document.getElementById("liveToggle"),
+      ueFile: document.getElementById("ueFile"),
+      snapshotFile: document.getElementById("snapshotFile"),
+      ueSelect: document.getElementById("ueSelect"),
+      speedSelect: document.getElementById("speedSelect"),
+      playToggle: document.getElementById("playToggle"),
+      stepBack: document.getElementById("stepBack"),
+      stepForward: document.getElementById("stepForward"),
+      timeline: document.getElementById("timeline"),
+      timeLabel: document.getElementById("timeLabel"),
+      frameLabel: document.getElementById("frameLabel"),
+      autoFollow: document.getElementById("autoFollow"),
+      playbackFocusedUeValue: document.getElementById("playbackFocusedUeValue"),
+      servingSatValue: document.getElementById("servingSatValue"),
+      neighborSatValue: document.getElementById("neighborSatValue"),
+      servingSnrValue: document.getElementById("servingSnrValue"),
+      neighborSnrValue: document.getElementById("neighborSnrValue"),
+      servingDistanceValue: document.getElementById("servingDistanceValue"),
+      neighborDistanceValue: document.getElementById("neighborDistanceValue"),
+      servingElevationValue: document.getElementById("servingElevationValue"),
+      neighborElevationValue: document.getElementById("neighborElevationValue"),
+      eventList: document.getElementById("eventList")
+    };
+
+    const state = {
+      viewer: null,
+      ueMeta: new Map(),
+      ueEntities: new Map(),
+      framesByUe: new Map(),
+      handoverEventsByUe: new Map(),
+      selectedUe: null,
+      timelineUe: null,
+      times: [],
+      frameIndex: 0,
+      animationTimer: null,
+      liveRefreshTimer: null,
+      speed: 1,
+      lastLoadedFrameCount: 0,
+      currentSatEntity: null,
+      targetSatEntity: null,
+      currentLinkEntity: null,
+      targetLinkEntity: null,
+      currentOrbitArcEntity: null,
+      targetOrbitArcEntity: null
+    };
+
+    function initViewer() {
+      state.viewer = new Cesium.Viewer("cesiumContainer", {
+        animation: false,
+        timeline: false,
+        geocoder: false,
+        homeButton: false,
+        sceneModePicker: false,
+        baseLayerPicker: false,
+        navigationHelpButton: false,
+        fullscreenButton: false,
+        selectionIndicator: false,
+        infoBox: false,
+        shouldAnimate: true
+      });
+      state.viewer.imageryLayers.removeAll();
+      state.viewer.imageryLayers.addImageryProvider(
+        new Cesium.UrlTemplateImageryProvider({
+          url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+          subdomains: ["a", "b", "c", "d"],
+          credit: "©OpenStreetMap contributors ©CARTO"
+        })
+      );
+      state.viewer.scene.globe.enableLighting = true;
+      state.viewer.scene.skyAtmosphere.show = true;
+
+      state.currentSatEntity = state.viewer.entities.add({
+        point: { pixelSize: 12, color: palette.serving, outlineColor: Cesium.Color.WHITE, outlineWidth: 2 },
+        label: labelStyle()
+      });
+      state.targetSatEntity = state.viewer.entities.add({
+        point: { pixelSize: 12, color: palette.target, outlineColor: Cesium.Color.WHITE, outlineWidth: 2 },
+        label: labelStyle()
+      });
+      state.currentLinkEntity = state.viewer.entities.add({
+        polyline: { positions: [], width: 3, material: palette.serving }
+      });
+      state.targetLinkEntity = state.viewer.entities.add({
+        polyline: {
+          positions: [],
+          width: 3,
+          material: new Cesium.PolylineDashMaterialProperty({
+            color: palette.target,
+            dashLength: 16
+          })
+        }
+      });
+      state.currentOrbitArcEntity = state.viewer.entities.add({
+        polyline: {
+          positions: [],
+          width: 4,
+          material: new Cesium.PolylineGlowMaterialProperty({
+            color: palette.serving.withAlpha(0.55),
+            glowPower: 0.18
+          })
+        }
+      });
+      state.targetOrbitArcEntity = state.viewer.entities.add({
+        polyline: {
+          positions: [],
+          width: 4,
+          material: new Cesium.PolylineGlowMaterialProperty({
+            color: palette.target.withAlpha(0.55),
+            glowPower: 0.18
+          })
+        }
+      });
+      state.viewer.camera.flyHome(0);
+    }
+
+    function labelStyle() {
+      return {
+        font: "700 20px Avenir Next, sans-serif",
+        fillColor: Cesium.Color.WHITE,
+        style: Cesium.LabelStyle.FILL,
+        showBackground: true,
+        backgroundColor: Cesium.Color.fromCssColorString("rgba(30,36,43,0.80)"),
+        pixelOffset: new Cesium.Cartesian2(0, -26),
+        horizontalOrigin: Cesium.HorizontalOrigin.CENTER
+      };
+    }
+
+    function setStatus(message, isError = false) {
+      const logFn = isError ? console.error : console.info;
+      logFn(message.replace(/<[^>]+>/g, ""));
+    }
+
+    function splitCsvLine(line) {
+      const out = [];
+      let cur = "";
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') {
+          if (inQuotes && line[i + 1] === '"') {
+            cur += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (ch === "," && !inQuotes) {
+          out.push(cur);
+          cur = "";
+        } else {
+          cur += ch;
+        }
+      }
+      out.push(cur);
+      return out;
+    }
+
+    function parseCsv(text) {
+      const lines = text.replace(/\r/g, "").split("\n").filter(Boolean);
+      if (!lines.length) return [];
+      const header = splitCsvLine(lines[0]);
+      return lines.slice(1).map((line) => {
+        const values = splitCsvLine(line);
+        const row = {};
+        header.forEach((key, index) => {
+          row[key] = values[index] ?? "";
+        });
+        return row;
+      });
+    }
+
+    function cartesianFromDeg(lon, lat, altKm = 0) {
+      return Cesium.Cartesian3.fromDegrees(lon, lat, altKm * 1000.0);
+    }
+
+    function compactSat(name) {
+      if (!name) return "-";
+      return name.replace("STARLINK-", "SL-").replace(" [DTC]", "");
+    }
+
+    function formatSnr(value) {
+      if (!Number.isFinite(value) || value <= -900) return "-";
+      return `${value.toFixed(2)} dB`;
+    }
+
+    function formatDistance(valueKm) {
+      if (!Number.isFinite(valueKm)) return "-";
+      return `${valueKm.toFixed(1)} km`;
+    }
+
+    function formatElevation(valueDeg) {
+      if (!Number.isFinite(valueDeg)) return "-";
+      return `${valueDeg.toFixed(1)} deg`;
+    }
+
+    function toEcefKm(latDeg, lonDeg, altKm = 0) {
+      const radiusKm = 6371.0 + altKm;
+      const lat = Cesium.Math.toRadians(latDeg);
+      const lon = Cesium.Math.toRadians(lonDeg);
+      const cosLat = Math.cos(lat);
+      return {
+        x: radiusKm * cosLat * Math.cos(lon),
+        y: radiusKm * cosLat * Math.sin(lon),
+        z: radiusKm * Math.sin(lat)
+      };
+    }
+
+    function vectorNorm(vec) {
+      return Math.sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+    }
+
+    function deriveLinkMetrics(ueLat, ueLon, satLat, satLon, satAltKm) {
+      if (![ueLat, ueLon, satLat, satLon, satAltKm].every(Number.isFinite)) {
+        return { distanceKm: NaN, elevationDeg: NaN };
+      }
+
+      const ue = toEcefKm(ueLat, ueLon, 0);
+      const sat = toEcefKm(satLat, satLon, satAltKm);
+      const los = {
+        x: sat.x - ue.x,
+        y: sat.y - ue.y,
+        z: sat.z - ue.z
+      };
+      const distanceKm = vectorNorm(los);
+      const losUnit = {
+        x: los.x / distanceKm,
+        y: los.y / distanceKm,
+        z: los.z / distanceKm
+      };
+      const ueNorm = vectorNorm(ue);
+      const upUnit = {
+        x: ue.x / ueNorm,
+        y: ue.y / ueNorm,
+        z: ue.z / ueNorm
+      };
+      const elevationDeg = Cesium.Math.toDegrees(Math.asin(
+        losUnit.x * upUnit.x + losUnit.y * upUnit.y + losUnit.z * upUnit.z
+      ));
+      return { distanceKm, elevationDeg };
+    }
+
+    function appendQuery(url, queryPart) {
+      return url.includes("?") ? `${url}&${queryPart}` : `${url}?${queryPart}`;
+    }
+
+    function currentSelectedTime() {
+      return state.times[state.frameIndex] ?? 0;
+    }
+
+    function chooseInitialUe() {
+      const available = [...state.framesByUe.keys()].sort((a, b) => a - b);
+      return available.length ? available[0] : null;
+    }
+
+    function resolveFrameIndex(preferredTime) {
+      if (!state.times.length) return 0;
+      if (preferredTime === Number.POSITIVE_INFINITY) return state.times.length - 1;
+      if (!Number.isFinite(preferredTime)) return Math.min(state.frameIndex, state.times.length - 1);
+
+      let bestIndex = 0;
+      let bestDelta = Number.POSITIVE_INFINITY;
+      state.times.forEach((time, index) => {
+        const delta = Math.abs(time - preferredTime);
+        if (delta < bestDelta) {
+          bestDelta = delta;
+          bestIndex = index;
+        }
+      });
+      return bestIndex;
+    }
+
+    async function readUploadedFile(file) {
+      return file.text();
+    }
+
+    async function loadDefaultFiles(options = {}) {
+      const {
+        preserveSelection = false,
+        followLatest = false,
+        silent = false
+      } = options;
+      try {
+        const cacheBust = `live_ts=${Date.now()}`;
+        const [ueResponse, snapshotResponse] = await Promise.all([
+          fetch(appendQuery(DEFAULT_UE_CSV_PATH, cacheBust), { cache: "no-store" }),
+          fetch(appendQuery(DEFAULT_SNAPSHOT_CSV_PATH, cacheBust), { cache: "no-store" })
+        ]);
+        if (!ueResponse.ok || !snapshotResponse.ok) {
+          throw new Error("Could not fetch one or both CSV files.");
+        }
+        const [ueText, snapshotText] = await Promise.all([
+          ueResponse.text(),
+          snapshotResponse.text()
+        ]);
+        ingestData(ueText, snapshotText, "Loaded default CSV paths.", {
+          preserveSelection,
+          preferredTime: followLatest ? Number.POSITIVE_INFINITY : currentSelectedTime()
+        });
+        if (!silent) {
+          setStatus(`Loaded default CSV paths. Parsed <strong>${state.ueMeta.size}</strong> UEs and <strong>${state.times.length}</strong> time steps.`);
+        }
+      } catch (error) {
+        setStatus(`Default fetch failed. ${error.message} Try <code>python3 -m http.server</code> or upload both CSV files manually.`, true);
+      }
+    }
+
+    async function maybeLoadUploadedFiles() {
+      const ueFile = dom.ueFile.files[0];
+      const snapshotFile = dom.snapshotFile.files[0];
+      if (!ueFile || !snapshotFile) return;
+      stopLiveRefresh();
+      const [ueText, snapshotText] = await Promise.all([
+        readUploadedFile(ueFile),
+        readUploadedFile(snapshotFile)
+      ]);
+      ingestData(ueText, snapshotText, "Loaded CSV files from local upload.");
+    }
+
+    function ingestData(ueCsvText, snapshotCsvText, statusMessage, options = {}) {
+      const {
+        preserveSelection = false,
+        preferredTime = null
+      } = options;
+
+      const ueRows = parseCsv(ueCsvText);
+      const snapshotRows = parseCsv(snapshotCsvText);
+      if (!ueRows.length || !snapshotRows.length) {
+        setStatus("CSV parsing returned no rows. Please verify both files.", true);
+        return;
+      }
+
+      state.ueMeta.clear();
+      state.framesByUe.clear();
+      state.handoverEventsByUe.clear();
+      state.times = [...new Set(snapshotRows.map((row) => Number(row.time_s)))].sort((a, b) => a - b);
+
+      ueRows.forEach((row) => {
+        const ueId = Number(row.ue_id);
+        state.ueMeta.set(ueId, {
+          ueId,
+          groupName: row.group_name,
+          lat: Number(row.lat),
+          lon: Number(row.lon),
+          scenario: row.scenario
+        });
+      });
+
+      snapshotRows.forEach((row) => {
+        const ueId = Number(row.ue_id);
+        const frame = {
+          time: Number(row.time_s),
+          ueId,
+          ueLat: Number(row.ue_lat),
+          ueLon: Number(row.ue_lon),
+          servingSat: row.serving_satellite,
+          servingLat: Number(row.serving_sat_lat),
+          servingLon: Number(row.serving_sat_lon),
+          servingAltKm: Number(row.serving_sat_alt_km),
+          servingSnr: Number(row.serving_snr_dB),
+          targetSat: row.best_neighbor_satellite,
+          targetLat: Number(row.best_neighbor_sat_lat),
+          targetLon: Number(row.best_neighbor_sat_lon),
+          targetAltKm: Number(row.best_neighbor_sat_alt_km),
+          targetSnr: Number(row.best_neighbor_snr_dB),
+          hoInProgress: Number(row.ho_in_progress) === 1
+        };
+        if (!state.framesByUe.has(ueId)) state.framesByUe.set(ueId, []);
+        state.framesByUe.get(ueId).push(frame);
+      });
+
+      for (const [ueId, frames] of state.framesByUe.entries()) {
+        frames.sort((a, b) => a.time - b.time);
+        state.handoverEventsByUe.set(ueId, deriveHandoverEvents(frames));
+      }
+
+      const previousSelectedUe = preserveSelection ? state.selectedUe : null;
+      const previousTimelineUe = preserveSelection ? state.timelineUe : null;
+      const fallbackUe = chooseInitialUe();
+      state.selectedUe = previousSelectedUe !== null && state.framesByUe.has(previousSelectedUe) ? previousSelectedUe : fallbackUe;
+      state.timelineUe = previousTimelineUe !== null && state.framesByUe.has(previousTimelineUe) ? previousTimelineUe : state.selectedUe;
+      state.frameIndex = resolveFrameIndex(preferredTime);
+
+      rebuildUeEntities();
+      populateUeSelect(dom.ueSelect, state.selectedUe);
+      refreshTimeline();
+      renderFrame();
+      state.lastLoadedFrameCount = state.times.length;
+      setStatus(`${statusMessage} Parsed <strong>${state.ueMeta.size}</strong> UEs and <strong>${state.times.length}</strong> time steps.`);
+    }
+
+    function deriveHandoverEvents(frames) {
+      const events = [];
+      let previousServing = null;
+      frames.forEach((frame) => {
+        if (previousServing && frame.servingSat && frame.servingSat !== previousServing) {
+          events.push({
+            time: frame.time,
+            from: previousServing,
+            to: frame.servingSat,
+            ueId: frame.ueId,
+            ueLat: frame.ueLat,
+            ueLon: frame.ueLon
+          });
+        }
+        previousServing = frame.servingSat || previousServing;
+      });
+      return events;
+    }
+
+    function rebuildUeEntities() {
+      for (const entity of state.ueEntities.values()) {
+        state.viewer.entities.remove(entity);
+      }
+      state.ueEntities.clear();
+
+      for (const meta of state.ueMeta.values()) {
+        const entity = state.viewer.entities.add({
+          position: cartesianFromDeg(meta.lon, meta.lat, 0),
+          point: {
+            pixelSize: 8,
+            color: palette.muted,
+            outlineColor: Cesium.Color.WHITE,
+            outlineWidth: 1
+          }
+        });
+        entity.description = `${meta.groupName} (${meta.scenario})`;
+        state.ueEntities.set(meta.ueId, entity);
+      }
+    }
+
+    function populateUeSelect(selectEl, selectedValue) {
+      selectEl.innerHTML = "";
+      const ueIds = [...state.framesByUe.keys()].sort((a, b) => a - b);
+      ueIds.forEach((ueId) => {
+        const meta = state.ueMeta.get(ueId);
+        const option = document.createElement("option");
+        option.value = String(ueId);
+        option.textContent = `UE-${ueId} · ${meta ? meta.groupName : "Unknown"}`;
+        selectEl.appendChild(option);
+      });
+      if (selectedValue !== null) selectEl.value = String(selectedValue);
+    }
+
+    function refreshTimeline() {
+      dom.timeline.max = String(Math.max(0, state.times.length - 1));
+      dom.timeline.value = String(state.frameIndex);
+      dom.timeLabel.textContent = `t = ${(state.times[state.frameIndex] ?? 0).toFixed(1)} s`;
+      dom.frameLabel.textContent = `Frame ${state.frameIndex + 1} / ${Math.max(1, state.times.length)}`;
+    }
+
+    function frameForSelectedUe(index) {
+      if (state.selectedUe === null) return null;
+      return (state.framesByUe.get(state.selectedUe) || [])[index] || null;
+    }
+
+    function buildOrbitArcPositions(frames, currentIndex, currentName, nameKey, lonKey, latKey, altKey) {
+      if (!currentName) return [];
+      const positions = [];
+      const windowRadius = 18;
+      let start = currentIndex;
+      let end = currentIndex;
+
+      while (start > 0 && currentIndex - start < windowRadius && frames[start - 1][nameKey] === currentName) {
+        start -= 1;
+      }
+      while (end < frames.length - 1 && end - currentIndex < windowRadius && frames[end + 1][nameKey] === currentName) {
+        end += 1;
+      }
+
+      for (let i = start; i <= end; i++) {
+        const item = frames[i];
+        positions.push(cartesianFromDeg(item[lonKey], item[latKey], item[altKey]));
+      }
+      return positions;
+    }
+
+    function renderFrame() {
+      refreshTimeline();
+      const frame = frameForSelectedUe(state.frameIndex);
+      if (!frame) return;
+
+      updateUeColors(frame.ueId);
+      updateCurrentEntities(frame);
+      updateStats(frame);
+      renderEventList(frame.time);
+
+      if (dom.autoFollow.checked) {
+        flyToFocusedUe(frame);
+      }
+    }
+
+    function updateUeColors(selectedUe) {
+      for (const [ueId, entity] of state.ueEntities.entries()) {
+        entity.point.color = ueId === selectedUe ? palette.focused : palette.muted;
+        entity.point.pixelSize = ueId === selectedUe ? 10 : 8;
+      }
+    }
+
+    function updateCurrentEntities(frame) {
+      const uePos = cartesianFromDeg(frame.ueLon, frame.ueLat, 0);
+
+      if (frame.servingSat) {
+        const satPos = cartesianFromDeg(frame.servingLon, frame.servingLat, frame.servingAltKm);
+        state.currentSatEntity.position = satPos;
+        state.currentSatEntity.show = true;
+        state.currentSatEntity.label.text = frame.servingSat;
+        state.currentLinkEntity.polyline.positions = [uePos, satPos];
+      } else {
+        state.currentSatEntity.show = false;
+        state.currentLinkEntity.polyline.positions = [];
+        state.currentOrbitArcEntity.polyline.positions = [];
+      }
+
+      if (frame.targetSat) {
+        const satPos = cartesianFromDeg(frame.targetLon, frame.targetLat, frame.targetAltKm);
+        state.targetSatEntity.position = satPos;
+        state.targetSatEntity.show = true;
+        state.targetSatEntity.label.text = frame.targetSat;
+        state.targetLinkEntity.polyline.positions = [uePos, satPos];
+      } else {
+        state.targetSatEntity.show = false;
+        state.targetLinkEntity.polyline.positions = [];
+        state.targetOrbitArcEntity.polyline.positions = [];
+      }
+
+      const frames = state.framesByUe.get(frame.ueId) || [];
+      state.currentOrbitArcEntity.polyline.positions = buildOrbitArcPositions(
+        frames,
+        state.frameIndex,
+        frame.servingSat,
+        "servingSat",
+        "servingLon",
+        "servingLat",
+        "servingAltKm"
+      );
+      state.targetOrbitArcEntity.polyline.positions = buildOrbitArcPositions(
+        frames,
+        state.frameIndex,
+        frame.targetSat,
+        "targetSat",
+        "targetLon",
+        "targetLat",
+        "targetAltKm"
+      );
+    }
+
+    function updateStats(frame) {
+      const servingMetrics = deriveLinkMetrics(frame.ueLat, frame.ueLon, frame.servingLat, frame.servingLon, frame.servingAltKm);
+      const targetMetrics = deriveLinkMetrics(frame.ueLat, frame.ueLon, frame.targetLat, frame.targetLon, frame.targetAltKm);
+      dom.playbackFocusedUeValue.textContent = `UE-${frame.ueId}`;
+      dom.servingSatValue.textContent = frame.servingSat || "-";
+      dom.neighborSatValue.textContent = frame.targetSat || "-";
+      dom.servingSnrValue.textContent = formatSnr(frame.servingSnr);
+      dom.neighborSnrValue.textContent = formatSnr(frame.targetSnr);
+      dom.servingDistanceValue.textContent = formatDistance(servingMetrics.distanceKm);
+      dom.neighborDistanceValue.textContent = formatDistance(targetMetrics.distanceKm);
+      dom.servingElevationValue.textContent = formatElevation(servingMetrics.elevationDeg);
+      dom.neighborElevationValue.textContent = formatElevation(targetMetrics.elevationDeg);
+      dom.ueSelect.value = String(frame.ueId);
+    }
+
+    function renderEventList(currentTime) {
+      dom.eventList.innerHTML = "";
+      const timelineUe = state.timelineUe;
+      const events = timelineUe !== null ? (state.handoverEventsByUe.get(timelineUe) || []) : [];
+      if (!events.length) {
+        const empty = document.createElement("div");
+        empty.className = "event-item";
+        empty.textContent = timelineUe === null ? "No UE selected for timeline." : `No handover events detected yet for UE-${timelineUe}.`;
+        dom.eventList.appendChild(empty);
+        return;
+      }
+
+      events.forEach((event) => {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = "event-item" + (timelineUe === state.selectedUe && Math.abs(event.time - currentTime) < 0.0001 ? " active" : "");
+        item.innerHTML = `<strong>UE-${timelineUe} · ${event.time.toFixed(1)} s</strong><br>${compactSat(event.from)} → ${compactSat(event.to)}`;
+        item.addEventListener("click", () => {
+          const index = state.times.findIndex((time) => Math.abs(time - event.time) < 0.0001);
+          if (index >= 0) {
+            state.frameIndex = index;
+            dom.timeline.value = String(index);
+            syncActiveUe(timelineUe);
+            renderFrame();
+          }
+        });
+        dom.eventList.appendChild(item);
+      });
+    }
+
+    function syncActiveUe(ueId) {
+      state.selectedUe = ueId;
+      state.timelineUe = ueId;
+      dom.ueSelect.value = String(ueId);
+      dom.playbackFocusedUeValue.textContent = `UE-${ueId}`;
+    }
+
+    function flyToFocusedUe(frame) {
+      state.viewer.camera.flyTo({
+        destination: cartesianFromDeg(frame.ueLon, frame.ueLat, 2200000),
+        duration: 0.8
+      });
+    }
+
+    function resetView() {
+      state.viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(121.0, 23.8, 18000000),
+        duration: 1.0
+      });
+    }
+
+    function play() {
+      stop();
+      dom.playToggle.textContent = "Pause";
+      state.animationTimer = window.setInterval(() => {
+        if (state.frameIndex >= state.times.length - 1) {
+          stop();
+          return;
+        }
+        state.frameIndex += 1;
+        dom.timeline.value = String(state.frameIndex);
+        renderFrame();
+      }, 900 / state.speed);
+    }
+
+    function stop() {
+      if (state.animationTimer) {
+        window.clearInterval(state.animationTimer);
+        state.animationTimer = null;
+      }
+      dom.playToggle.textContent = "Play";
+    }
+
+    function startLiveRefresh() {
+      stopLiveRefresh();
+      dom.liveToggle.textContent = "Stop Live";
+      state.liveRefreshTimer = window.setInterval(async () => {
+        await loadDefaultFiles({
+          preserveSelection: true,
+          followLatest: true,
+          silent: true
+        });
+      }, LIVE_REFRESH_MS);
+    }
+
+    function stopLiveRefresh() {
+      if (state.liveRefreshTimer) {
+        window.clearInterval(state.liveRefreshTimer);
+        state.liveRefreshTimer = null;
+      }
+      dom.liveToggle.textContent = "Start Live";
+    }
+
+    dom.loadDefault.addEventListener("click", () => loadDefaultFiles());
+    dom.fitView.addEventListener("click", resetView);
+    dom.ueFile.addEventListener("change", maybeLoadUploadedFiles);
+    dom.snapshotFile.addEventListener("change", maybeLoadUploadedFiles);
+    dom.liveToggle.addEventListener("click", () => {
+      if (state.liveRefreshTimer) {
+        stopLiveRefresh();
+      } else {
+        startLiveRefresh();
+      }
+    });
+    dom.ueSelect.addEventListener("change", () => {
+      syncActiveUe(Number(dom.ueSelect.value));
+      renderFrame();
+    });
+    dom.speedSelect.addEventListener("change", () => {
+      state.speed = Number(dom.speedSelect.value);
+      if (state.animationTimer) play();
+    });
+    dom.playToggle.addEventListener("click", () => {
+      if (!state.times.length) return;
+      if (state.animationTimer) stop(); else play();
+    });
+    dom.stepBack.addEventListener("click", () => {
+      if (!state.times.length) return;
+      stop();
+      state.frameIndex = Math.max(0, state.frameIndex - 1);
+      dom.timeline.value = String(state.frameIndex);
+      renderFrame();
+    });
+    dom.stepForward.addEventListener("click", () => {
+      if (!state.times.length) return;
+      stop();
+      state.frameIndex = Math.min(state.times.length - 1, state.frameIndex + 1);
+      dom.timeline.value = String(state.frameIndex);
+      renderFrame();
+    });
+    dom.timeline.addEventListener("input", () => {
+      if (!state.times.length) return;
+      stop();
+      state.frameIndex = Number(dom.timeline.value);
+      renderFrame();
+    });
+
+    initViewer();
+    resetView();
+    loadDefaultFiles();
+  </script>
+</body>
+</html>

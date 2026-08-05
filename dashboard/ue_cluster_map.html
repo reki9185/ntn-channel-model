@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <style>
+        #map {
+            position: absolute;
+            inset: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .leaflet-container {
+            font-size: 1rem;
+            background: #eef3f7;
+        }
+
+        .legend {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 12px 14px;
+            border-radius: 10px;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.15);
+            line-height: 1.5;
+            color: #1f2937;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .legend-title {
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .legend-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .legend-swatch {
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(0, 0, 0, 0.25);
+            flex: 0 0 auto;
+        }
+
+        .ue-label {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            color: #0f172a;
+            font-size: 11px;
+            font-weight: 700;
+            text-shadow: 0 0 3px rgba(255, 255, 255, 0.95), 0 0 6px rgba(255, 255, 255, 0.85);
+        }
+
+        .ue-label.leaflet-tooltip-right::before,
+        .ue-label.leaflet-tooltip-left::before,
+        .ue-label.leaflet-tooltip-top::before,
+        .ue-label.leaflet-tooltip-bottom::before {
+            border: none;
+        }
+
+        .leaflet-bottom.leaflet-left .leaflet-control-layers {
+            margin-bottom: 18px;
+        }
+    </style>
+
+    <script>
+        L_NO_TOUCH = false;
+        L_DISABLE_3D = false;
+    </script>
+</head>
+<body>
+    <div id="map"></div>
+</body>
+<script>
+    const DATA = {"center": [23.573717, 120.867725], "bounds": [[22.11237, 119.536794], [25.041169, 121.56535]], "points": [{"name": "Rural_02", "groupId": "854b8637fffffff", "scenario": "Rural", "ueLabel": "UE1", "lat": 22.11237, "lon": 121.556289, "color": "#2a9d8f", "label": "Rural"}, {"name": "Rural_03", "groupId": "854bb513fffffff", "scenario": "Rural", "ueLabel": "UE2", "lat": 23.505112, "lon": 119.536794, "color": "#2a9d8f", "label": "Rural"}, {"name": "Tainan_05", "groupId": "854bb113fffffff", "scenario": "Suburban", "ueLabel": "UE3", "lat": 22.8071, "lon": 120.257296, "color": "#f4a261", "label": "Suburban"}, {"name": "Hsinchu_04", "groupId": "854ba01bfffffff", "scenario": "Suburban", "ueLabel": "UE4", "lat": 24.638688, "lon": 120.938998, "color": "#f4a261", "label": "Suburban"}, {"name": "Taipei_01", "groupId": "854ba0a7fffffff", "scenario": "Urban", "ueLabel": "UE5", "lat": 25.041169, "lon": 121.517518, "color": "#e76f51", "label": "Urban"}, {"name": "Hualien_01", "groupId": "854ba3c7fffffff", "scenario": "Urban", "ueLabel": "UE6", "lat": 24.043084, "lon": 121.56535, "color": "#e76f51", "label": "Urban"}, {"name": "Rural_01", "groupId": "854b847bfffffff", "scenario": "Rural", "ueLabel": "UE7", "lat": 22.604569, "lon": 121.453789, "color": "#2a9d8f", "label": "Rural"}, {"name": "Rural_04", "groupId": "854bb58ffffffff", "scenario": "Rural", "ueLabel": "UE8", "lat": 24.02, "lon": 121.163, "color": "#2a9d8f", "label": "Rural"}, {"name": "Kaohsiung_02", "groupId": "854bb103fffffff", "scenario": "Suburban", "ueLabel": "UE9", "lat": 22.706205, "lon": 120.360551, "color": "#f4a261", "label": "Suburban"}, {"name": "Taichung_05", "groupId": "854ba05bfffffff", "scenario": "Suburban", "ueLabel": "UE10", "lat": 24.317491, "lon": 120.676971, "color": "#f4a261", "label": "Suburban"}, {"name": "Chiayi_01", "groupId": "854ba257fffffff", "scenario": "Urban", "ueLabel": "UE11", "lat": 23.515102, "lon": 120.518416, "color": "#e76f51", "label": "Urban"}]};
+
+    const map = L.map("map", {
+        center: DATA.center,
+        crs: L.CRS.EPSG3857,
+        zoom: 9,
+        zoomControl: true,
+        preferCanvas: false
+    });
+
+    const tileLayer = L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+        {
+            minZoom: 0,
+            maxZoom: 20,
+            maxNativeZoom: 20,
+            noWrap: false,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: "abcd",
+            detectRetina: false,
+            tms: false,
+            opacity: 1
+        }
+    );
+    tileLayer.addTo(map);
+
+    const layers = {
+        Rural: L.featureGroup().addTo(map),
+        Suburban: L.featureGroup().addTo(map),
+        Urban: L.featureGroup().addTo(map),
+        Unknown: L.featureGroup().addTo(map)
+    };
+
+    function triangleLatLngs(lat, lon) {
+        const side = 0.085;
+        const height = (Math.sqrt(3) / 2) * side;
+        return [
+            [lat + (2 * height) / 3, lon],
+            [lat - height / 3, lon - side / 2],
+            [lat - height / 3, lon + side / 2]
+        ];
+    }
+
+    DATA.points.forEach((point) => {
+        const popupHtml = `<div style="min-width: 180px;"><b>${point.ueLabel}</b> - ${point.name}<br>Group ID: ${point.groupId}<br>Scenario: ${point.scenario}</div>`;
+
+        const layerKey = layers[point.scenario] ? point.scenario : "Unknown";
+        const marker = L.polygon(
+            triangleLatLngs(point.lat, point.lon),
+            {
+                bubblingMouseEvents: true,
+                color: "white",
+                dashArray: null,
+                dashOffset: null,
+                fill: true,
+                fillColor: point.color,
+                fillOpacity: 0.9,
+                fillRule: "evenodd",
+                lineCap: "round",
+                lineJoin: "round",
+                opacity: 1.0,
+                radius: 7,
+                stroke: true,
+                weight: 1
+            }
+        ).bindPopup(popupHtml).bindTooltip(point.ueLabel, {
+            permanent: true,
+            direction: "right",
+            offset: [6, -2],
+            className: "ue-label",
+            opacity: 1,
+            sticky: false
+        });
+        layers[layerKey].addLayer(marker);
+    });
+
+    L.control.layers(
+        null,
+        {
+            "Rural": layers.Rural,
+            "Suburban": layers.Suburban,
+            "Urban": layers.Urban,
+            "Unknown": layers.Unknown
+        },
+        {
+            collapsed: false,
+            position: "bottomleft"
+        }
+    ).addTo(map);
+
+    const legend = L.control({position: "topright"});
+    legend.onAdd = function() {
+        const div = L.DomUtil.create("div", "legend");
+        div.innerHTML = `
+            <div class="legend-title">Scenario</div>
+            <div class="legend-row"><span class="legend-swatch" style="background: #2a9d8f;"></span> Rural</div>
+            <div class="legend-row"><span class="legend-swatch" style="background: #f4a261;"></span> Suburban</div>
+            <div class="legend-row"><span class="legend-swatch" style="background: #e76f51;"></span> Urban</div>
+        `;
+        return div;
+    };
+    legend.addTo(map);
+
+    map.fitBounds(DATA.bounds);
+</script>
+</html>
