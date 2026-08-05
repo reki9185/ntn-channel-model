@@ -15,6 +15,11 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 .coverage
+.editorconfig
+.clang-format
+.clang-tidy
+.codex
+.codespellrc
 htmlcov/
 
 *.cwnd
