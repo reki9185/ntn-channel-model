@@ -21,7 +21,7 @@ echo "Output directory: $OUTPUT_DIR"
 echo ""
 
 # Common simulation parameters
-SIM_ARGS="--simTime=100 --reportingOffset=1 --choExecutionOffset=3.0 --minElevation=20 --maxDistance=1500 --timeToTrigger=1 --measurementPeriod=1"
+SIM_ARGS="--simTime=3600 --reportingOffset=1 --choExecutionOffset=3.0 --minElevation=20 --maxDistance=1500 --timeToTrigger=1 --measurementPeriod=1"
 
 # Run one simulation and save log to $OUTPUT_DIR/<name>_seed<N>.txt
 run_sim() {

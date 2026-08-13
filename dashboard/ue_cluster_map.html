@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <title>U.S. East Coast UE Cluster Map</title>
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
 
@@ -86,7 +87,23 @@
     <div id="map"></div>
 </body>
 <script>
-    const DATA = {"center": [23.573717, 120.867725], "bounds": [[22.11237, 119.536794], [25.041169, 121.56535]], "points": [{"name": "Rural_02", "groupId": "854b8637fffffff", "scenario": "Rural", "ueLabel": "UE1", "lat": 22.11237, "lon": 121.556289, "color": "#2a9d8f", "label": "Rural"}, {"name": "Rural_03", "groupId": "854bb513fffffff", "scenario": "Rural", "ueLabel": "UE2", "lat": 23.505112, "lon": 119.536794, "color": "#2a9d8f", "label": "Rural"}, {"name": "Tainan_05", "groupId": "854bb113fffffff", "scenario": "Suburban", "ueLabel": "UE3", "lat": 22.8071, "lon": 120.257296, "color": "#f4a261", "label": "Suburban"}, {"name": "Hsinchu_04", "groupId": "854ba01bfffffff", "scenario": "Suburban", "ueLabel": "UE4", "lat": 24.638688, "lon": 120.938998, "color": "#f4a261", "label": "Suburban"}, {"name": "Taipei_01", "groupId": "854ba0a7fffffff", "scenario": "Urban", "ueLabel": "UE5", "lat": 25.041169, "lon": 121.517518, "color": "#e76f51", "label": "Urban"}, {"name": "Hualien_01", "groupId": "854ba3c7fffffff", "scenario": "Urban", "ueLabel": "UE6", "lat": 24.043084, "lon": 121.56535, "color": "#e76f51", "label": "Urban"}, {"name": "Rural_01", "groupId": "854b847bfffffff", "scenario": "Rural", "ueLabel": "UE7", "lat": 22.604569, "lon": 121.453789, "color": "#2a9d8f", "label": "Rural"}, {"name": "Rural_04", "groupId": "854bb58ffffffff", "scenario": "Rural", "ueLabel": "UE8", "lat": 24.02, "lon": 121.163, "color": "#2a9d8f", "label": "Rural"}, {"name": "Kaohsiung_02", "groupId": "854bb103fffffff", "scenario": "Suburban", "ueLabel": "UE9", "lat": 22.706205, "lon": 120.360551, "color": "#f4a261", "label": "Suburban"}, {"name": "Taichung_05", "groupId": "854ba05bfffffff", "scenario": "Suburban", "ueLabel": "UE10", "lat": 24.317491, "lon": 120.676971, "color": "#f4a261", "label": "Suburban"}, {"name": "Chiayi_01", "groupId": "854ba257fffffff", "scenario": "Urban", "ueLabel": "UE11", "lat": 23.515102, "lon": 120.518416, "color": "#e76f51", "label": "Urban"}]};
+    // U.S. East Coast / Mid-Atlantic viewport, matching simulation_groups_washington_dc.csv.
+    const DATA = {
+        center: [39.0, -77.5],
+        bounds: [[28.0, -91.0], [50.0, -64.0]],
+        points: [
+            {name: "Washington_DC_01", groupId: "852aa847fffffff", scenario: "Urban", ueLabel: "UE1", lat: 38.897700, lon: -77.036500, color: "#e76f51", label: "Urban"},
+            {name: "Baltimore_MD_01", groupId: "852aa8c3fffffff", scenario: "Urban", ueLabel: "UE2", lat: 39.290400, lon: -76.612200, color: "#e76f51", label: "Urban"},
+            {name: "Philadelphia_PA_01", groupId: "852a134ffffffff", scenario: "Suburban", ueLabel: "UE3", lat: 39.952600, lon: -75.165200, color: "#f4a261", label: "Suburban"},
+            {name: "New_York_NY_01", groupId: "852a1073fffffff", scenario: "Rural", ueLabel: "UE4", lat: 40.712800, lon: -74.006000, color: "#2a9d8f", label: "Rural"},
+            {name: "Boston_MA_01", groupId: "852a3067fffffff", scenario: "Urban", ueLabel: "UE5", lat: 42.360100, lon: -71.058900, color: "#e76f51", label: "Urban"},
+            {name: "Pittsburgh_PA_01", groupId: "852a8473fffffff", scenario: "Urban", ueLabel: "UE6", lat: 40.440600, lon: -79.995900, color: "#e76f51", label: "Urban"},
+            {name: "Richmond_VA_01", groupId: "852a8d9bfffffff", scenario: "Suburban", ueLabel: "UE7", lat: 37.540700, lon: -77.436000, color: "#f4a261", label: "Suburban"},
+            {name: "Norfolk_VA_01", groupId: "852af623fffffff", scenario: "Suburban", ueLabel: "UE8", lat: 36.850800, lon: -76.285900, color: "#f4a261", label: "Suburban"},
+            {name: "Shenandoah_VA_01", groupId: "852aaa6bfffffff", scenario: "Rural", ueLabel: "UE9", lat: 38.545000, lon: -78.438000, color: "#2a9d8f", label: "Rural"},
+            {name: "Appalachia_WV_01", groupId: "852a9caffffffff", scenario: "Rural", ueLabel: "UE10", lat: 38.350000, lon: -81.630000, color: "#2a9d8f", label: "Rural"}
+        ]
+    };
 
     const map = L.map("map", {
         center: DATA.center,

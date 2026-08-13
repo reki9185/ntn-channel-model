@@ -1,0 +1,11 @@
+sim_id,group_name,group_id,num_users,lat,lon,scenario
+0,Washington_DC_01,852aa847fffffff,300,38.897700,-77.036500,Urban
+1,Baltimore_MD_01,852aa8c3fffffff,240,39.290400,-76.612200,Urban
+2,Philadelphia_PA_01,852a134ffffffff,280,39.952600,-75.165200,Suburban
+3,New_York_NY_01,852a1073fffffff,320,40.712800,-74.006000,Rural
+4,Boston_MA_01,852a3067fffffff,220,42.360100,-71.058900,Urban
+5,Pittsburgh_PA_01,852a8473fffffff,180,40.440600,-79.995900,Urban
+6,Richmond_VA_01,852a8d9bfffffff,110,37.540700,-77.436000,Suburban
+7,Norfolk_VA_01,852af623fffffff,95,36.850800,-76.285900,Suburban
+8,Shenandoah_VA_01,852aaa6bfffffff,35,38.545000,-78.438000,Rural
+9,Appalachia_WV_01,852a9caffffffff,28,38.350000,-81.630000,Rural

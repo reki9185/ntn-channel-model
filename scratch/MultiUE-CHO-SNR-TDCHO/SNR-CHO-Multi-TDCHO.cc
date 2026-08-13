@@ -2921,18 +2921,18 @@ int
 main(int argc, char* argv[])
 {
     // Simulation parameters
-    std::string csvFile = "dataset/visible_satellites_hsinchu.csv";
-    std::string ueGroupsCsvFile = "dataset/ue/simulation_groups_taiwan2.csv";
+    std::string csvFile = "dataset/visible_satellites_washington_dc.csv";
+    std::string ueGroupsCsvFile = "dataset/ue/simulation_groups_washington_dc.csv";
     std::vector<std::string> satelliteNames = {"STARLINK-2692", "STARLINK-5801", "STARLINK-1433"};
     double simTime = 300.0;  // 5 minutes to see multiple handovers
     double packetInterval = 0.001; //0.001 too small
-    double minElevation = 0.0;  // Minimum elevation to include satellite (0 = use predefined list)
+    double minElevation = 0.0;  // Auto-discover all satellites visible above the horizon
     
     // NTN channel parameters (3GPP TR 38.811 compliant)
     
     g_frequency = 20.0e9;     // 20 GHz Ka-band
     g_txPower = 19.5;        // 19.5 dBm - TX amplifier output power
-    g_txAntennaGain = 34;   // 30.5 dBi - Satellite antenna power gain
+    g_txAntennaGain = 30.5;   // 30.5 dBi - Satellite antenna power gain
     g_rxGain = 39.7;   // 39.7 dBi - VAST user terminal antenna
     g_noiseFigure = 1.2;         // 1.2 dB - VAST 
     g_bandwidth = 250e6;      // 250 MHz per resource block
@@ -2942,10 +2942,11 @@ main(int argc, char* argv[])
     // Parse command line
     CommandLine cmd;
     cmd.AddValue("csvFile", "Path to SGP4 CSV file", csvFile);
+    cmd.AddValue("ueGroupsCsvFile", "Path to UE-groups CSV file", ueGroupsCsvFile);
     cmd.AddValue("simTime", "Simulation time (seconds)", simTime);
     cmd.AddValue("txPower", "Transmit power (dBm)", g_txPower);
     cmd.AddValue("fecGain", "FEC coding gain (dB)", g_fecCodingGain);
-    cmd.AddValue("minElevation", "Minimum peak elevation to include satellites (0=use predefined list)", minElevation);
+    cmd.AddValue("minElevation", "Minimum peak elevation to include auto-discovered satellites (-1=use predefined list)", minElevation);
     
     // SNR-based handover parameters (PRIMARY)
     cmd.AddValue("reportingOffset", "Event A3 offset for reporting (dB)", g_reportingOffset);
@@ -2977,8 +2978,9 @@ main(int argc, char* argv[])
         }
     }
 
-    // Auto-discover satellites if minElevation specified
-    if (minElevation > 0.0)
+    // Auto-discover satellites when minElevation is non-negative.
+    // 0° preserves every satellite visible above the horizon.
+    if (minElevation >= 0.0)
     {
         satelliteNames = DiscoverSatellites(csvFile, minElevation, simTime);
         if (satelliteNames.empty())
@@ -3004,12 +3006,12 @@ main(int argc, char* argv[])
     std::cout << "FEC Gain: " << g_fecCodingGain << " dB" << std::endl;
     std::cout << "========================================\n" << std::endl;
     
-    // Convert ground station position to ECEF
-    // Hsinchu, Taiwan coordinates (matching SatTrack.py: 24.8°N, 120.97°E, 0m)
-    GeographicToECEF(24.8, 120.97, 0.0, g_groundX, g_groundY, g_groundZ);
+    // Convert ground-station position to ECEF. Keep this identical to SatTrack.py.
+    // White House, Washington, D.C.: 38.8977°N, 77.0365°W, 15 m altitude.
+    GeographicToECEF(38.8977, -77.0365, 15.0, g_groundX, g_groundY, g_groundZ);
     
-    std::cout << "Ground station (Hsinchu, Taiwan):" << std::endl;
-    std::cout << "  Lat/Lon: 24.8°N, 120.97°E, 0m alt" << std::endl;
+    std::cout << "Ground station (White House, Washington, D.C.):" << std::endl;
+    std::cout << "  Lat/Lon: 38.8977°N, 77.0365°W, 15m alt" << std::endl;
     std::cout << "  ECEF: (" << g_groundX/1000.0 << ", " 
               << g_groundY/1000.0 << ", " << g_groundZ/1000.0 << ") km\n" << std::endl;
     
